@@ -39,14 +39,18 @@ def send_enter():
 def button_pressed():
     return cp.button_a
 
+
+def switch_active():
+    return cp.switch
+# only fiddle witht the LED if it is not active
 def set_led_on():
-    cp.red_led = True
+    cp.red_led = switch_active()
 
 def set_led_off():
     cp.red_led = False
 
 def toggle_led():
-    cp.red_led = not cp.red_led 
+    cp.red_led = switch_active() and not cp.red_led 
 set_led_on()
 
 pixel_cursor = 0
@@ -60,11 +64,15 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 
 def set_all_pixels(color):
+    if not switch_active():
+        color = black
     cp.pixels.fill(color)
     cp.pixels.show()
 set_all_pixels(red)
 
 def set_pixel(index, color):
+    if not switch_active():
+        color = black
     cp.pixels[index] = color
     cp.pixels.show()
 
