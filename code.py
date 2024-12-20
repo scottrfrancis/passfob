@@ -14,16 +14,20 @@
 # Reference: https://circuitpython.org/board/circuitplayground_express/
 #
 
+import random
 from adafruit_circuitplayground import cp
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.keycode import Keycode  
+from adafruit_hid.mouse import Mouse
 import time
 import usb_hid
 
 
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayoutUS(kbd)
+
+mouse = Mouse(usb_hid.devices)
 
 def send_key(key):
     global layout, kbd
@@ -39,9 +43,23 @@ def send_enter():
 def button_pressed():
     return cp.button_a
 
+last_move = time.monotonic()
+move_interval = random.randint(5, 300)
+def wiggle_mouse():
+    global mouse, last_move, move_interval
 
+    if time.monotonic() - last_move > move_interval:
+        last_move = time.monotonic()
+        move_interval = random.randint(5, 300)
+
+        x = random.randint(-800, 800)
+        y = random.randint(-800, 800)
+        mouse.move(x, y)
+
+override_switch = False
 def switch_active():
-    return cp.switch
+    global override_switch
+    return cp.switch and not override_switch
 # only fiddle witht the LED if it is not active
 def set_led_on():
     cp.red_led = switch_active()
@@ -50,7 +68,8 @@ def set_led_off():
     cp.red_led = False
 
 def toggle_led():
-    cp.red_led = switch_active() and not cp.red_led 
+    # cp.red_led = switch_active() and not cp.red_led 
+    cp.red_led = not cp.red_led 
 set_led_on()
 
 pixel_cursor = 0
@@ -118,7 +137,7 @@ def read_password():
     # add a return to enter the password
 
 def do_work():
-    global password, state, tick
+    global password, state, tick, override_switch
 
     # take action based on current state
     toggle_led()
@@ -136,6 +155,7 @@ def do_work():
         tick = 0.05
         set_all_pixels(black)
     elif state == states["SENDING_PASSWORD"]:
+        override_switch = True
         rotate_pixels(blue)
         # send the next key press -- quickly
         if password:
@@ -147,6 +167,7 @@ def do_work():
             if not password:
                 # send a ENTER key to finish the password
                 send_enter()
+                override_switch = False
         tick = 0.1
 
     # detect state -- order is important here
@@ -164,6 +185,16 @@ def do_work():
         pass
     else:
         state = states["IDLE"]
+
+    # if switch is NOT active, wiggle the mouse
+    if not switch_active():
+        override_switch = True
+        set_all_pixels(green)
+        wiggle_mouse()
+        time.sleep(0.1)
+        set_all_pixels(black)
+        override_switch = False
+
 
 # print("Passfob ready")
 while True:

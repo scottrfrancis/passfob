@@ -37,9 +37,11 @@ ___NB___: some systems may restrict this kind of access and/or block mounting th
 7. When the 'A' Button is released, the password will be spooled out on char at a time and the pixels will rotate in BLUE.
 8. The pixels will then flash in RED again before reloading the password and giving rotating green dots.
 
-### quiet mode
+### quiet mode / mouse wiggler
 
 Having the rotating lights can be kind of annoying.  Slide the switch to the RIGHT to mute the pixels, etc.  Slide it back to the LEFT to enable all the LED animations, etc.  The 'A' button will send the password in either case.
+
+When the Switch is to the RIGHT, the mouse wiggler will randomly move the mouse up/down, left/right by a random amount of up to 800 pixels. This movement will be randomly repeated every 5 s to 5 minutes to keep a screen from sleeping, etc.
 
 ## Notes
 
